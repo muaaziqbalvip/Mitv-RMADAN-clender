@@ -2,7 +2,7 @@
   "name": "MI RAMADAN clender",
   "short_name": "MI RAMADAN",
   "description": "Advanced Ramadan Dashboard by Muaaz Iqbal",
-  "start_url": "index.html.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#010409",
   "theme_color": "#ffcc33",
