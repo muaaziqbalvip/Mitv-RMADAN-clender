@@ -354,6 +354,187 @@
     margin-top: 15px;
     cursor: pointer;
 }
+/* Live Quran FM Bar Styling */
+.radio-container {
+    background: linear-gradient(135deg, rgba(255, 204, 51, 0.1), rgba(0, 0, 0, 0.9));
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(255, 204, 51, 0.1);
+}
+
+.radio-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.radio-visualizer {
+    width: 50px;
+    height: 50px;
+    background: var(--gold);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+    box-shadow: 0 0 15px var(--gold);
+}
+
+.radio-meta {
+    flex-grow: 1;
+}
+
+.radio-meta h4 {
+    font-family: 'Orbitron';
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin: 0;
+}
+
+.radio-meta p {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin: 3px 0 0 0;
+}
+
+.radio-controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    padding: 10px 15px;
+    border-radius: 15px;
+}
+
+.btn-play-radio {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    color: #000;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.btn-play-radio:active {
+    transform: scale(0.9);
+}
+
+/* Visualizer Animation */
+.playing .radio-visualizer {
+    animation: pulse-gold 1.5s infinite;
+}
+
+@keyframes pulse-gold {
+    0% { box-shadow: 0 0 0 0 rgba(255, 204, 51, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 204, 51, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 204, 51, 0); }
+}
+/* Random Iftar Dua Section */
+.dua-container {
+    background: linear-gradient(rgba(255, 49, 49, 0.05), rgba(0, 0, 0, 0.9));
+    border: 1px solid rgba(255, 204, 51, 0.3);
+    border-radius: 25px;
+    padding: 25px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-left: 4px solid var(--gold);
+}
+
+.dua-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+    direction: rtl;
+    line-height: 2.2;
+    display: block;
+    text-shadow: 0 0 10px rgba(255, 204, 51, 0.3);
+}
+
+#dua-translation {
+    font-size: 0.95rem;
+    color: #e6edf3;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    display: block;
+    font-style: italic;
+}
+
+.dua-title {
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    color: var(--neon-red);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.btn-refresh-dua {
+    background: rgba(255, 204, 51, 0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+/* Sehri Dua Section Styling */
+.sehri-dua-container {
+    background: linear-gradient(rgba(0, 255, 255, 0.05), rgba(0, 0, 0, 0.9));
+    border: 1px solid rgba(255, 204, 51, 0.3);
+    border-radius: 25px;
+    padding: 25px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-right: 4px solid var(--gold);
+}
+
+.sehri-dua-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+    direction: rtl;
+    line-height: 2.2;
+    display: block;
+}
+
+#sehri-translation {
+    font-size: 0.95rem;
+    color: #e6edf3;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    display: block;
+    font-style: italic;
+}
+
+.sehri-title {
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    color: #00ffff;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
 
     </style>
 </head>
@@ -413,6 +594,27 @@
                 <div class="val" id="iftar-val" style="color: var(--neon-red);">--:--</div>
             </div>
         </div>
+        <div class="radio-container" id="radio-box">
+    <div class="radio-info">
+        <div class="radio-visualizer">
+            <i class="fas fa-broadcast-tower"></i>
+        </div>
+        <div class="radio-meta">
+            <h4>LIVE QURAN FM</h4>
+            <p id="radio-status">Station: Mishary Rashid Alafasy</p>
+        </div>
+    </div>
+    
+    <div class="radio-controls">
+        <div style="font-size: 0.6rem; color: var(--gold); font-family: 'Orbitron';">LIVE STREAMING...</div>
+        <button class="btn-play-radio" onclick="toggleRadio()" id="radio-btn">
+            <i class="fas fa-play" id="radio-icon"></i>
+        </button>
+    </div>
+    
+    <audio id="quran-radio" src="https://radio.mp3islam.com/listen/mishary/radio.mp3"></audio>
+</div>
+
         <div class="ayat-container">
     <div style="color: var(--neon-green); margin-bottom: 10px;"><i class="fas fa-quran"></i></div>
     <div id="ayat-box">
@@ -454,7 +656,29 @@
         SubhanAllah • Alhamdulillah • Allahu Akbar
     </div>
 </div>
-
+<div class="dua-container">
+    <div class="dua-title"><i class="fas fa-hand-holding-heart"></i> Iftar Ki Dua</div>
+    <div id="dua-box">
+        <span class="dua-arabic" id="dua-ar">ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ</span>
+        <span id="dua-translation">"Pyaas bujh gayi, ragen tar ho gayin aur ajr pakka ho gaya InshaAllah."</span>
+    </div>
+    <button class="btn-refresh-dua" onclick="generateDua()">NEXT DUA</button>
+</div>
+<div class="sehri-dua-container">
+    <div class="sehri-title"><i class="fas fa-cloud-sun"></i> Sehri Ki Niyat</div>
+    <div id="sehri-box">
+        <span class="sehri-dua-arabic">وَبِصَوْمِ غَدٍ نَّوَيْتُ مِنْ شَهْرِ رَمَضَانَ</span>
+        <span id="sehri-translation">"Aur maine kal ke Ramadan ke roze ki niyat ki."</span>
+    </div>
+</div>
+<div class="dua-container">
+    <div class="dua-title"><i class="fas fa-hand-holding-heart"></i> Iftar Ki Dua</div>
+    <div id="dua-box">
+        <span class="dua-arabic" id="dua-ar">ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ</span>
+        <span id="dua-translation">"Pyaas bujh gayi, ragen tar ho gayin aur ajr pakka ho gaya InshaAllah."</span>
+    </div>
+    <button class="btn-refresh-dua" onclick="generateDua()">NEXT DUA</button>
+</div>
     <div class="mi-footer-fixed">
         <div class="dev-tag">DEVELOPED BY 𝐌𝐔𝐀𝐀𝐙 𝐈𝐐𝐁𝐀𝐋 | ICS SCIENCE EXPERT</div>
         <div class="social-row">
@@ -874,6 +1098,86 @@ function generateAyat() {
 window.addEventListener('load', () => {
     generateHadith();
     generateAyat();
+});
+/* ================================================
+   LIVE QURAN FM ENGINE
+   ================================================
+*/
+const radioAudio = document.getElementById('quran-radio');
+const radioBtn = document.getElementById('radio-btn');
+const radioIcon = document.getElementById('radio-icon');
+const radioBox = document.getElementById('radio-box');
+const radioStatus = document.getElementById('radio-status');
+
+let isRadioPlaying = false;
+
+function toggleRadio() {
+    if (!isRadioPlaying) {
+        // Play Radio
+        radioAudio.play().then(() => {
+            isRadioPlaying = true;
+            radioIcon.className = "fas fa-pause";
+            radioBox.classList.add('playing');
+            radioStatus.innerText = "Playing: Mishary Alafasy";
+            radioStatus.style.color = "var(--neon-green)";
+        }).catch(err => {
+            alert("Streaming link load nahi ho saki. Internet check karein.");
+        });
+    } else {
+        // Pause Radio
+        radioAudio.pause();
+        isRadioPlaying = false;
+        radioIcon.className = "fas fa-play";
+        radioBox.classList.remove('playing');
+        radioStatus.innerText = "Station: Mishary Alafasy (Paused)";
+        radioStatus.style.color = "#aaa";
+    }
+}
+
+// Volume Control (Mobile Optimized)
+radioAudio.volume = 0.8;
+/* ================================================
+   RANDOM IFTAR DUA ENGINE (MUAAZ EDITION)
+   ================================================
+*/
+const iftarDuas = [
+    {
+        ar: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ",
+        en: "Pyaas bujh gayi, ragen tar ho gayin aur Allah ne chaha to ajr thar gaya.",
+        ref: "Sunan Abi Dawud"
+    },
+    {
+        ar: "اللَّهُمَّ لَكَ صُمْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ",
+        en: "Aye Allah! Maine Tere hi liye roza rakha aur Tere hi diye huye rizq par iftar kiya.",
+        ref: "Mishkat al-Masabih"
+    },
+    {
+        ar: "يَا وَاسِعَ الْفَضْلِ اغْفِرْ لِي",
+        en: "Aye bahut bade fazl wale! Meri maghfirat farma de.",
+        ref: "Iftar ke waqt ki khas dua"
+    }
+];
+
+function generateDua() {
+    const randomIdx = Math.floor(Math.random() * iftarDuas.length);
+    const data = iftarDuas[randomIdx];
+    
+    const box = document.getElementById('dua-box');
+    box.style.opacity = 0;
+    
+    setTimeout(() => {
+        document.getElementById('dua-ar').innerText = data.ar;
+        document.getElementById('dua-translation').innerText = `"${data.en}"`;
+        box.style.opacity = 1;
+        box.style.transition = "0.5s ease";
+    }, 300);
+}
+
+// Window load par add karein
+window.addEventListener('load', () => {
+    generateHadith();
+    generateAyat();
+    generateDua(); // Initial Dua Load
 });
 
     </script>
