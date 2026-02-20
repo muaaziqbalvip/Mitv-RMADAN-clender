@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/png" href="https://i.ibb.co/rKM2mKWt/1771605401569.png">
 <link rel="apple-touch-icon" href="https://i.ibb.co/rKM2mKWt/1771605401569.png">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@100;300;400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -535,6 +536,85 @@
     margin-bottom: 10px;
     text-transform: uppercase;
 }
+/* ================================================
+   LIVE TV PLAYER CSS (MI GOLD EDITION)
+   ================================================ */
+.tv-container {
+    background: #000;
+    border: 2px solid var(--gold);
+    border-radius: 20px;
+    margin-top: 25px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 30px rgba(255, 204, 51, 0.2);
+}
+
+.tv-header {
+    background: rgba(255, 204, 51, 0.1);
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 204, 51, 0.3);
+}
+
+.tv-logo {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    object-fit: cover;
+}
+
+#mi-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: block;
+    background: #000;
+}
+
+.tv-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.95));
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    transition: 0.3s ease;
+    z-index: 10;
+}
+
+/* Mobile par touch karne se controls dikhen */
+.tv-container:hover .tv-controls, 
+.tv-container:active .tv-controls { opacity: 1; }
+
+.btn-tv {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-tv:hover { color: var(--gold); }
+
+.live-badge {
+    background: var(--neon-red);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    font-family: 'Orbitron';
+    animation: blink-red 1s infinite;
+}
+
+@keyframes blink-red { 50% { opacity: 0.5; } }
 
     </style>
 </head>
@@ -639,7 +719,29 @@
             <div id="prayer-items-box">
                 </div>
         </div>
+<div class="tv-container" id="mi-tv-wrapper">
+    <div class="tv-header">
+        <img src="https://i.ibb.co/gMhwDPS8/Pegamtv.jpg" class="tv-logo" alt="Paigham TV">
+        <div style="flex-grow: 1;">
+            <h4 style="font-family: 'Orbitron'; font-size: 0.8rem; color: var(--gold); margin: 0;">PAIGHAM TV</h4>
+            <div class="live-badge">LIVE STREAM</div>
+        </div>
+    </div>
 
+    <video id="mi-video" playsinline crossorigin="anonymous"></video>
+
+    <div class="tv-controls">
+        <div style="display: flex; gap: 20px;">
+            <button class="btn-tv" onclick="toggleTV()"><i class="fas fa-play" id="tv-icon"></i></button>
+            <button class="btn-tv" onclick="toggleMute()"><i class="fas fa-volume-up" id="vol-icon"></i></button>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="font-size: 0.5rem; color: #aaa; font-family: 'Orbitron'; letter-spacing: 1px;">MI ENGINE 2.0</div>
+            <button class="btn-tv" onclick="toggleFullscreen()"><i class="fas fa-expand" id="expand-icon"></i></button>
+        </div>
+    </div>
+</div>
     </div>
 <div class="tasbeeh-container">
     <div class="tasbeeh-label">Digital Tasbeeh Counter</div>
@@ -1179,7 +1281,69 @@ window.addEventListener('load', () => {
     generateAyat();
     generateDua(); // Initial Dua Load
 });
+/* ================================================
+   PAIGHAM TV ENGINE LOGIC (MUAAZ IQBAL EDITION)
+   ================================================ */
+const video = document.getElementById('mi-video');
+const tvWrapper = document.getElementById('mi-tv-wrapper');
+const expandIcon = document.getElementById('expand-icon');
+const tvIcon = document.getElementById('tv-icon');
+const volIcon = document.getElementById('vol-icon');
+const m3u8Url = "https://cdn22lhr.tamashaweb.com:8087/jazzauth/PaighamTV-abr/playlist.m3u8";
 
+// 1. Fast Loading Setup (HLS)
+if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(m3u8Url);
+    hls.attachMedia(video);
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = m3u8Url;
+}
+
+// 2. Play/Pause Toggle
+function toggleTV() {
+    if (video.paused) {
+        video.play();
+        tvIcon.className = "fas fa-pause";
+        // Agar Radio chal raha hai to usse band kar do
+        if (typeof isRadioPlaying !== 'undefined' && isRadioPlaying) toggleRadio();
+    } else {
+        video.pause();
+        tvIcon.className = "fas fa-play";
+    }
+}
+
+// 3. Mute/Unmute Toggle
+function toggleMute() {
+    video.muted = !video.muted;
+    volIcon.className = video.muted ? "fas fa-volume-mute" : "fas fa-volume-up";
+}
+
+// 4. Maximize (Fullscreen) Toggle
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        if (tvWrapper.requestFullscreen) {
+            tvWrapper.requestFullscreen();
+        } else if (tvWrapper.webkitRequestFullscreen) { // Safari/iOS
+            tvWrapper.webkitRequestFullscreen();
+        } else if (video.webkitEnterFullscreen) { // iPhone specific
+            video.webkitEnterFullscreen();
+        }
+        expandIcon.className = "fas fa-compress";
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        expandIcon.className = "fas fa-expand";
+    }
+}
+
+// Fullscreen exit hone par icon reset karna
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+        expandIcon.className = "fas fa-expand";
+    }
+});
     </script>
 </body>
 </html>
