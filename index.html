@@ -615,6 +615,92 @@
 }
 
 @keyframes blink-red { 50% { opacity: 0.5; } }
+/* Live News Ticker Styling */
+.ticker-wrapper {
+    width: 100%;
+    background: #000;
+    border-bottom: 1px solid var(--gold);
+    height: 35px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: sticky;
+    top: 75px; /* Header ke bilkul niche */
+    z-index: 999;
+}
+
+.ticker-label {
+    background: var(--gold);
+    color: #000;
+    padding: 0 15px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    font-weight: 900;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+}
+
+.ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: ticker-scroll 25s linear infinite;
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-family: 'Poppins';
+}
+
+.ticker-item {
+    display: inline-block;
+    padding: 0 30px;
+}
+
+.ticker-item i {
+    margin-right: 8px;
+    color: #fff;
+}
+
+@keyframes ticker-scroll {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* Pause scroll on hover/touch */
+.ticker-wrapper:hover .ticker-content {
+    animation-play-state: paused;
+}
+/* Floating Install Button */
+#pwa-install-btn {
+    display: none; /* Shuru mein chhupa rahega */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #000;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 0.8rem;
+    border: none;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px var(--gold);
+    z-index: 9999;
+    cursor: pointer;
+    align-items: center;
+    gap: 10px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+    40% {transform: translateX(-50%) translateY(-10px);}
+    60% {transform: translateX(-50%) translateY(-5px);}
+}
 
     </style>
 </head>
@@ -645,8 +731,21 @@
         </div>
     </div>
 </header>
-
-
+<div class="ticker-wrapper">
+    <div class="ticker-label">LATEST UPDATES</div>
+    <div class="ticker-content" id="mi-ticker">
+        <div class="ticker-item"><i class="fas fa-bullhorn"></i> Welcome to MI RAMADAN PRO - ICS Science Expert Edition</div>
+        <div class="ticker-item"><i class="fas fa-clock"></i> Live Sehri & Iftar Countdown Active</div>
+        <div class="ticker-item"><i class="fas fa-tv"></i> Watch Paigham TV Live Stream with Maximize Mode</div>
+        <div class="ticker-item"><i class="fas fa-microphone"></i> Listen Live Quran FM by Mishary Rashid Alafasy</div>
+        <div class="ticker-item"><i class="fas fa-fingerprint"></i> Digital Tasbeeh Counter with Haptic Feedback Ready</div>
+        <div class="ticker-item"><i class="fas fa-star"></i> Random Quranic Ayat & Ahadees updated daily</div>
+        <div class="ticker-item"><i class="fas fa-bell"></i> Loud Alarm Notification System Integrated</div>
+    </div>
+</div>
+<button id="pwa-install-btn">
+    <i class="fas fa-download"></i> INSTALL MI RAMADAN PRO
+</button>
     <div class="main-container" id="main-ui">
         
         <div class="hero-section">
@@ -963,6 +1062,7 @@ function heartbeat() {
         triggerLoudAlarm();
     }
 
+
     // --- PART 3: DYNAMIC COUNTDOWN ENGINE ---
     updateCountdownLogic(now, sehriTime, iftarTime);
 }
@@ -1014,6 +1114,18 @@ function updateCountdownLogic(now, sT_raw, iT_raw) {
     document.getElementById('countdown').innerText = 
         `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     document.getElementById('timer-title').innerText = label;
+}
+// Is line ko heartbeat() function ke andar kahin bhi paste kar dein
+function updateTickerMessage(label, color) {
+    const ticker = document.getElementById('mi-ticker');
+    // Notification logic yahan extend ki ja sakti hai
+}
+
+// Example Trigger (Iftar se 10 min pehle ticker ka color change karna)
+// Isse heartbeat ke andar use karein:
+if (h === 0 && min <= 10 && label === "Iftar Starts In") {
+    document.querySelector('.ticker-label').style.background = "var(--neon-red)";
+    document.querySelector('.ticker-label').innerText = "ALERT: IFTAR NEAR";
 }
 
         // 7. Live Ramadan Aura (Particles)
@@ -1344,6 +1456,40 @@ document.addEventListener('fullscreenchange', () => {
         expandIcon.className = "fas fa-expand";
     }
 });
+/* ================================================
+   PWA INSTALLATION ENGINE (CHROME OPTIMIZED)
+   ================================================ */
+const installBtn = document.getElementById('pwa-install-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Chrome ko default prompt dikhane se rokna
+    e.preventDefault();
+    // Event ko save karlo taake baad mein use ho sake
+    deferredPrompt = e;
+    // Ab apna custom button dikhao
+    installBtn.style.display = 'flex';
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Install prompt dikhao
+        deferredPrompt.prompt();
+        // User ka choice check karo
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        // Prompt khatam, ab dobara use nahi ho sakta
+        deferredPrompt = null;
+        // Button chhupa do
+        installBtn.style.display = 'none';
+    }
+});
+
+// Agar app pehle se install ho jaye to button gayab kar do
+window.addEventListener('appinstalled', (evt) => {
+    console.log('MI RAMADAN PRO was installed.');
+    installBtn.style.display = 'none';
+});
+
     </script>
 </body>
 </html>
