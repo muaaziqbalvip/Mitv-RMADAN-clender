@@ -192,6 +192,168 @@
     .mi-logo { font-size: 1.1rem; }
     .mi-header-clock { font-size: 0.75rem; padding: 4px 8px; min-width: 75px; }
 }
+/* Digital Tasbeeh Section Styling */
+.tasbeeh-container {
+    background: var(--mi-gradient);
+    border: 2px solid var(--gold);
+    border-radius: 30px;
+    padding: 30px 20px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.tasbeeh-display {
+    background: #000;
+    border: 4px inset #222;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+#tasbeeh-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255, 204, 51, 0.6);
+    display: block;
+}
+
+.tasbeeh-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.tasbeeh-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+
+.btn-count {
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle, var(--gold), #b8860b);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 8px 0 #8b6508, 0 15px 25px rgba(0,0,0,0.4);
+    cursor: pointer;
+    active: transform: translateY(5px);
+    active: box-shadow: 0 2px 0 #8b6508;
+    transition: 0.1s;
+}
+
+.btn-reset {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-family: 'Orbitron';
+}
+/* Random Hadith Section */
+.hadith-container {
+    background: linear-gradient(rgba(255, 204, 51, 0.05), rgba(0, 0, 0, 0.8));
+    border: 1px solid rgba(255, 204, 51, 0.3);
+    border-radius: 20px;
+    padding: 25px;
+    margin-top: 25px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hadith-icon {
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+#hadith-text {
+    font-family: 'Amiri', serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #fff;
+    margin-bottom: 15px;
+    display: block;
+}
+
+#hadith-ref {
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 600;
+    font-style: italic;
+}
+
+.btn-refresh-hadith {
+    background: none;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-refresh-hadith:hover {
+    background: var(--gold);
+    color: #000;
+}
+/* Random Quranic Ayat Section */
+.ayat-container {
+    background: linear-gradient(rgba(57, 255, 20, 0.05), rgba(0, 0, 0, 0.9));
+    border: 1px solid rgba(57, 255, 20, 0.2);
+    border-radius: 25px;
+    padding: 25px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.ayat-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 1.6rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+    direction: rtl;
+    line-height: 2;
+    display: block;
+}
+
+#ayat-translation {
+    font-size: 1rem;
+    color: #e6edf3;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#ayat-ref {
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.btn-refresh-ayat {
+    background: rgba(255, 204, 51, 0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    margin-top: 15px;
+    cursor: pointer;
+}
 
     </style>
 </head>
@@ -251,6 +413,24 @@
                 <div class="val" id="iftar-val" style="color: var(--neon-red);">--:--</div>
             </div>
         </div>
+        <div class="ayat-container">
+    <div style="color: var(--neon-green); margin-bottom: 10px;"><i class="fas fa-quran"></i></div>
+    <div id="ayat-box">
+        <span class="ayat-arabic" id="ayat-ar">يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ</span>
+        <span id="ayat-translation">"Aay logon jo imaan laye ho, tum par roze farz kiye gaye hain..."</span>
+        <div id="ayat-ref">Surah Al-Baqarah: 183</div>
+    </div>
+    <button class="btn-refresh-ayat" onclick="generateAyat()">REFRESH AYAT</button>
+</div>
+
+<div class="hadith-container">
+    <div class="hadith-icon"><i class="fas fa-book-open"></i></div>
+    <div id="hadith-box">
+        <span id="hadith-text">Ramadan ki fazeelat loading...</span>
+        <div id="hadith-ref">---</div>
+    </div>
+    <button class="btn-refresh-hadith" onclick="generateHadith()">NEXT HADITH</button>
+</div>
 
         <div class="prayer-list">
             <h4 style="font-family: 'Orbitron'; font-size: 0.8rem; margin-bottom: 15px; border-left: 3px solid var(--gold); padding-left: 10px;">TODAY'S NAMAZ</h4>
@@ -259,6 +439,21 @@
         </div>
 
     </div>
+<div class="tasbeeh-container">
+    <div class="tasbeeh-label">Digital Tasbeeh Counter</div>
+    <div class="tasbeeh-display">
+        <span id="tasbeeh-count">000</span>
+    </div>
+    
+    <div class="tasbeeh-buttons">
+        <button class="btn-reset" onclick="resetTasbeeh()">RESET</button>
+        <button class="btn-count" onclick="countTasbeeh()"></button>
+    </div>
+    
+    <div style="margin-top: 15px; font-size: 0.7rem; color: var(--gold); font-family: 'Amiri';">
+        SubhanAllah • Alhamdulillah • Allahu Akbar
+    </div>
+</div>
 
     <div class="mi-footer-fixed">
         <div class="dev-tag">DEVELOPED BY 𝐌𝐔𝐀𝐀𝐙 𝐈𝐐𝐁𝐀𝐋 | ICS SCIENCE EXPERT</div>
@@ -543,6 +738,142 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   // Yahan tum chaho to koi button dikha sakte ho "Install App" ka
+});
+/* ================================================
+   TASBEEH COUNTER LOGIC
+   ================================================
+*/
+let count = 0;
+
+function countTasbeeh() {
+    count++;
+    updateTasbeehDisplay();
+    
+    // Haptic Feedback (Vibration) for Mobile
+    if (navigator.vibrate) {
+        navigator.vibrate(50); 
+    }
+    
+    // Sound effect on every click (Optional)
+    const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
+    tickSound.volume = 0.2;
+    tickSound.play();
+}
+
+function resetTasbeeh() {
+    if(confirm("Kya aap counter zero karna chahte hain?")) {
+        count = 0;
+        updateTasbeehDisplay();
+    }
+}
+
+function updateTasbeehDisplay() {
+    const display = document.getElementById('tasbeeh-count');
+    display.innerText = count.toString().padStart(3, '0');
+    
+    // Golden Flash Effect
+    display.style.color = "#fff";
+    setTimeout(() => { display.style.color = "var(--gold)"; }, 100);
+}
+/* ================================================
+   RANDOM HADITH ENGINE (MUAAZ IQBAL EDITION)
+   ================================================
+*/
+const ahadees = [
+    {
+        text: "Jis ne imaan aur ehtisab ke sath Ramadan ke roze rakhe, us ke pichle tamam gunah maaf kar diye jayenge.",
+        ref: "Sahih Bukhari: 1901"
+    },
+    {
+        text: "Roza jahannam se bachne ke liye ek dhaal hai.",
+        ref: "Sahih Muslim: 1151"
+    },
+    {
+        text: "Ramadan ki har raat Allah Ta'ala bahut se logon ko jahannam se azad farmata hai.",
+        ref: "Sunan Ibn Majah: 1643"
+    },
+    {
+        text: "Roze dar ke liye do khushiyan hain: ek iftar ke waqt aur ek apne Rab se mulaqat ke waqt.",
+        ref: "Sahih Bukhari: 1904"
+    },
+    {
+        text: "Jannat ka ek darwaza hai jis ka naam 'Rayyan' hai, jis se qayamat ke din sirf roze dar dakhil honge.",
+        ref: "Sahih Muslim: 1152"
+    }
+];
+
+function generateHadith() {
+    const randomIndex = Math.floor(Math.random() * ahadees.length);
+    const selectedHadith = ahadees[randomIndex];
+    
+    const textElem = document.getElementById('hadith-text');
+    const refElem = document.getElementById('hadith-ref');
+    
+    // Fade effect animation
+    textElem.style.opacity = 0;
+    setTimeout(() => {
+        textElem.innerText = `"${selectedHadith.text}"`;
+        refElem.innerText = `— ${selectedHadith.ref}`;
+        textElem.style.opacity = 1;
+    }, 300);
+}
+
+// Initial call when dashboard loads
+window.addEventListener('load', () => {
+    // Agar startEngine ke andar call karna chahen to wahan bhi kar sakte hain
+    generateHadith();
+});
+/* ================================================
+   RANDOM QURANIC AYAT LOGIC
+   ================================================
+*/
+const quranAyat = [
+    {
+        ar: "كُتِبَ عَلَيْكُمُ الصِّيَامُ كَمَا كُتِبَ عَلَى الَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ",
+        en: "Tum par roze farz kiye gaye hain jaise tum se pehle logon par farz kiye gaye thay, taake tum parhezgaar ban jao.",
+        ref: "Surah Al-Baqarah: 183"
+    },
+    {
+        ar: "شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ",
+        en: "Ramadan wo mahina hai jis mein Quran nazil kiya gaya, jo logon ke liye hidayat hai.",
+        ref: "Surah Al-Baqarah: 185"
+    },
+    {
+        ar: "وَأَن تَصُومُوا خَيْرٌ لَّكُمْ ۖ إِن كُنتُمْ تَعْلَمُونَ",
+        en: "Aur tumhara roza rakhna tumhare liye behtar hai, agar tum jante ho.",
+        ref: "Surah Al-Baqarah: 184"
+    },
+    {
+        ar: "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ",
+        en: "Aur jab Mere bande Mere bare mein puchen, to (keh do) Main qareeb hoon (dua qubool karta hoon).",
+        ref: "Surah Al-Baqarah: 186"
+    }
+];
+
+function generateAyat() {
+    const randomIdx = Math.floor(Math.random() * quranAyat.length);
+    const data = quranAyat[randomIdx];
+    
+    // Animation transitions
+    const box = document.getElementById('ayat-box');
+    box.style.opacity = 0;
+    box.style.transform = "translateY(10px)";
+    
+    setTimeout(() => {
+        document.getElementById('ayat-ar').innerText = data.ar;
+        document.getElementById('ayat-translation').innerText = `"${data.en}"`;
+        document.getElementById('ayat-ref').innerText = data.ref;
+        
+        box.style.opacity = 1;
+        box.style.transform = "translateY(0)";
+        box.style.transition = "0.5s ease";
+    }, 300);
+}
+
+// Update startEngine or window load to include this
+window.addEventListener('load', () => {
+    generateHadith();
+    generateAyat();
 });
 
     </script>
