@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MI RAMADAN | NEURAL ADMIN PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --neon-gold: #ffcc33;
+            --neon-red: #ff4444;
+            --bg-dark: #050505;
+            --card-bg: #0f0f0f;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Digital Background Grid */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,204,51,0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,204,51,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        .admin-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--neon-gold);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px var(--neon-gold);
+        }
+
+        h1 { font-family: 'Orbitron'; letter-spacing: 5px; color: var(--neon-gold); }
+
+        /* Auth Guard Overlay */
+        #auth-guard {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cyber-input {
+            background: #111;
+            border: 1px solid var(--neon-gold);
+            color: var(--neon-gold);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Orbitron';
+            text-align: center;
+            width: 250px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 15px rgba(255, 204, 51, 0.2);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--neon-gold);
+        }
+
+        .stat-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stat-label { color: #888; text-transform: uppercase; font-size: 12px; }
+        .stat-value { font-family: 'Orbitron'; font-size: 24px; color: var(--neon-gold); }
+
+        /* Chat Control List */
+        .admin-chat-list {
+            height: 400px;
+            overflow-y: auto;
+            background: #000;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .admin-msg-item {
+            background: var(--glass);
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--neon-gold);
+        }
+
+        .del-btn {
+            background: var(--neon-red);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .action-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-main {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Orbitron';
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-clear { background: var(--neon-red); color: white; }
+        .btn-clear:hover { box-shadow: 0 0 20px var(--neon-red); }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-gold); border-radius: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="auth-guard">
+        <h2 style="font-family: 'Orbitron'; color: var(--neon-gold);">IDENTITY REQUIRED</h2>
+        <input type="password" id="admin-key" class="cyber-input" placeholder="ENTER ADMIN KEY">
+        <button onclick="login()" class="btn-main" style="background: var(--neon-gold); width: 280px;">AUTHENTICATE</button>
+    </div>
+
+    <div class="admin-wrapper">
+        <header>
+            <h1>ADMIN CONTROL UNIT</h1>
+            <p>Welcome, Muaaz Iqbal | System Status: <span style="color: #00ff00;">ONLINE</span></p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3 style="font-family: 'Orbitron'; margin-top: 0;">DATA TELEMETRY</h3>
+                <div class="stat-box">
+                    <span class="stat-label">Total Views</span>
+                    <span id="view-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Live Users</span>
+                    <span id="online-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Database Entries</span>
+                    <span id="msg-total" class="stat-value">0</span>
+                </div>
+            </div>
+<div class="card" style="grid-column: span 1.5; border-color: #0088ff;">
+    <h3 style="font-family: 'Orbitron'; margin-top: 0; color: #0088ff;">📡 GLOBAL BROADCASTER</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" id="notif-title" class="cyber-input" style="width: 95%; border-color: #0088ff;" placeholder="Notification Title (e.g. Iftar Alert)">
+        <textarea id="notif-body" class="cyber-input" style="width: 95%; height: 80px; border-color: #0088ff; text-align: left;" placeholder="Write your message here..."></textarea>
+        <button onclick="broadcastNotification()" class="btn-main" style="background: #0088ff; color: white;">SEND TO ALL USERS</button>
+    </div>
+</div>
+
+            <div class="card" style="grid-column: span 1.5;">
+                <h3 style="font-family: 'Orbitron'; margin-top: 0;">FEEDBACK MODERATION</h3>
+                <div id="admin-chat" class="admin-chat-list">
+                    </div>
+                <div class="action-bar">
+                    <button onclick="clearAllChat()" class="btn-main btn-clear">NUCLEAR WIPE (CLEAR ALL)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Config Muaaz Iqbal (from uploaded file context)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+            authDomain: "ramadan-2385b.firebaseapp.com",
+            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+            projectId: "ramadan-2385b",
+            storageBucket: "ramadan-2385b.firebasestorage.app",
+            messagingSenderId: "882828936310",
+            appId: "1:882828936310:web:7f97b921031fe130fe4b57"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. Authentication Logic
+        function login() {
+            const key = document.getElementById('admin-key').value;
+            if(key === "MI123") { // Secret Key
+                document.getElementById('auth-guard').style.display = 'none';
+                initDashboard();
+            } else {
+                alert("ACCESS DENIED: INVALID NEURAL KEY");
+            }
+        }
+
+        function initDashboard() {
+            // Stats Sync
+            db.ref('stats/totalViews').on('value', s => document.getElementById('view-count').innerText = s.val() || 0);
+            db.ref('stats/onlineNow').on('value', s => document.getElementById('online-count').innerText = s.numChildren() || 0);
+            
+            // Chat Monitoring
+            const chatBox = document.getElementById('admin-chat');
+            db.ref('public_chat').on('value', snapshot => {
+                chatBox.innerHTML = ""; // Refresh list
+                let count = 0;
+                snapshot.forEach(child => {
+                    count++;
+                    const data = child.val();
+                    const key = child.key;
+                    chatBox.innerHTML += `
+                        <div class="admin-msg-item">
+                            <div>
+                                <b style="color:var(--neon-gold)">${data.username}</b>: ${data.text}
+                            </div>
+                            <button class="del-btn" onclick="deleteMsg('${key}')">TERMINATE</button>
+                        </div>
+                    `;
+                });
+                document.getElementById('msg-total').innerText = count;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        // Action Functions
+        function deleteMsg(key) {
+            if(confirm("Confirm deletion?")) db.ref('public_chat').child(key).remove();
+        }
+
+        function clearAllChat() {
+            if(confirm("DANGER: This will delete ALL database records. Proceed?")) {
+                db.ref('public_chat').remove();
+            }
+        }
+        function broadcastNotification() {
+    const title = document.getElementById('notif-title').value;
+    const body = document.getElementById('notif-body').value;
+
+    if (title && body) {
+        db.ref('notifications/latest').set({
+            title: title,
+            body: body,
+            timestamp: Date.now()
+        }).then(() => {
+            alert("BROADCAST SENT: Sabhi users ko notification bhej di gayi hai!");
+            document.getElementById('notif-title').value = "";
+            document.getElementById('notif-body').value = "";
+        });
+    } else {
+        alert("ERROR: Title aur Body dono likhna zaroori hai!");
+    }
+}
+
+    </script>
+</body>
+</html>

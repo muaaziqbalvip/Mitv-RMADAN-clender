@@ -1901,6 +1901,21 @@ function requestNotificationPermission() {
         }
     });
 }
+// Database se notifications listen karna
+db.ref('notifications/latest').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Check karein ke ye notification purana to nahi (last 30 seconds mein aaya ho)
+        const now = Date.now();
+        if (now - data.timestamp < 30000) {
+            // Browser notification dikhana
+            sendLocalNotification(data.title, data.body);
+            
+            // Website ke andar bhi ek popup dikha sakte hain (Optional)
+            console.log("New Admin Announcement: " + data.body);
+        }
+    }
+});
 
     </script>
     
