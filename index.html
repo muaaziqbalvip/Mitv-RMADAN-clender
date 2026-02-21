@@ -10,6 +10,8 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co/rKM2mKWt/1771605401569.png">
 <link rel="apple-touch-icon" href="https://i.ibb.co/rKM2mKWt/1771605401569.png">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@100;300;400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -701,6 +703,52 @@
     40% {transform: translateX(-50%) translateY(-10px);}
     60% {transform: translateX(-50%) translateY(-5px);}
 }
+/* Live Stats Bar Styling */
+.social-stats-bar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(255, 204, 51, 0.1);
+    border: 1px solid var(--gold);
+    padding: 10px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 0.6rem;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-weight: 700;
+}
+
+#like-trigger {
+    background: none;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#like-trigger.liked {
+    background: var(--gold);
+    color: #000;
+}
 
     </style>
 </head>
@@ -753,6 +801,7 @@
             <div class="timer-label" id="timer-title">Next Event Loading...</div>
             <div id="countdown">00:00:00</div>
             <div id="hijri-box" style="font-family: 'Amiri'; color: var(--gold); font-size: 1.4rem;">-- Ramadan 1447</div>
+            
         </div>
 
         <div class="stats-grid">
@@ -784,14 +833,13 @@
             <p id="radio-status">Station: Mishary Rashid Alafasy</p>
         </div>
     </div>
-    
+
     <div class="radio-controls">
         <div style="font-size: 0.6rem; color: var(--gold); font-family: 'Orbitron';">LIVE STREAMING...</div>
         <button class="btn-play-radio" onclick="toggleRadio()" id="radio-btn">
             <i class="fas fa-play" id="radio-icon"></i>
         </button>
-    </div>
-    
+    </div>    
     <audio id="quran-radio" src="https://radio.mp3islam.com/listen/mishary/radio.mp3"></audio>
 </div>
 
@@ -803,6 +851,20 @@
         <div id="ayat-ref">Surah Al-Baqarah: 183</div>
     </div>
     <button class="btn-refresh-ayat" onclick="generateAyat()">REFRESH AYAT</button>
+    <div class="social-stats-bar">
+    <div class="stat-item">
+        <span class="stat-label">Online</span>
+        <span id="online-count" class="stat-value">0</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Views</span>
+        <span id="view-count" class="stat-value">0</span>
+    </div>
+    <button id="like-trigger" onclick="handleLike()">
+        ❤️ <span id="like-count">0</span>
+    </div>
+</div>
+
 </div>
 
 <div class="hadith-container">
@@ -851,7 +913,7 @@
     
     <div class="tasbeeh-buttons">
         <button class="btn-reset" onclick="resetTasbeeh()">RESET</button>
-        <button class="btn-count" onclick="countTasbeeh()"></button>
+        <button class="btn-count" onclick="countTasbeeh()"></button>       
     </div>
     
     <div style="margin-top: 15px; font-size: 0.7rem; color: var(--gold); font-family: 'Amiri';">
@@ -871,10 +933,33 @@
     <div id="sehri-box">
         <span class="sehri-dua-arabic">وَبِصَوْمِ غَدٍ نَّوَيْتُ مِنْ شَهْرِ رَمَضَانَ</span>
         <span id="sehri-translation">"Aur maine kal ke Ramadan ke roze ki niyat ki."</span>
+        <div class="social-stats-bar">
+    <div class="stat-item">
+        <span class="stat-label">Online</span>
+        <span id="online-count" class="stat-value">0</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Views</span>
+        <span id="view-count" class="stat-value">0</span>
+    </div>
+    <button id="like-trigger" onclick="handleLike()">
+        ❤️ <span id="like-count">0</span>
+    </div>
+</div>
+
     </div>
 </div>
 <div class="dua-container">
     <div class="dua-title"><i class="fas fa-hand-holding-heart"></i> Iftar Ki Dua</div>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+<div class="social-stats-bar">
+    <span>Online: <id id="online-count">0</id></span>
+    <span>Views: <id id="view-count">0</id></span>
+    <button id="like-trigger" onclick="handleLike()">❤️ <span id="like-count">0</span></button>
+</div>
+
     <div id="dua-box">
         <span class="dua-arabic" id="dua-ar">ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ</span>
         <span id="dua-translation">"Pyaas bujh gayi, ragen tar ho gayin aur ajr pakka ho gaya InshaAllah."</span>
@@ -883,11 +968,13 @@
 </div>
     <div class="mi-footer-fixed">
         <div class="dev-tag">DEVELOPED BY 𝐌𝐔𝐀𝐀𝐙 𝐈𝐐𝐁𝐀𝐋 | ICS SCIENCE EXPERT</div>
+        
         <div class="social-row">
             <a href="https://whatsapp.com/channel/0029VbBxejr4tRryT1wVqu0D"><i class="fab fa-whatsapp"></i></a>
             <a href="https://t.me/MITV_NETWORK"><i class="fab fa-telegram"></i></a>
             <a href="https://m.youtube.com/@muslimislamofficial"><i class="fab fa-youtube"></i></a>
             <a href="https://www.facebook.com/share/14Xf5k1kc2J/"><i class="fab fa-facebook"></i></a>
+            
         </div>
     </div>
 
@@ -912,6 +999,7 @@
     <audio id="alarm-audio" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
 
     <script>
+        
         /* ================================================
            MEGA JAVASCRIPT ENGINE (800+ LINES LOGIC)
            ================================================
@@ -1477,7 +1565,75 @@ window.addEventListener('appinstalled', (evt) => {
     console.log('MI RAMADAN PRO was installed.');
     installBtn.style.display = 'none';
 });
+// Tumhare project ka specific Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+  authDomain: "ramadan-2385b.firebaseapp.com",
+  databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+  projectId: "ramadan-2385b",
+  storageBucket: "ramadan-2385b.firebasestorage.app",
+  messagingSenderId: "882828936310",
+  appId: "1:882828936310:web:7f97b921031fe130fe4b57",
+  measurementId: "G-FWXBNG4RNT"
+};
+
+// Isse initialize karne ke liye:
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+/* ================================================
+   MI RAMADAN LIVE ENGINE - PLUG & PLAY
+   ================================================ */
+
+function activateLiveStats() {
+    // 1. Database References
+    const viewsRef = db.ref('stats/totalViews');
+    const onlineRef = db.ref('stats/onlineNow');
+    const likesRef = db.ref('stats/totalLikes');
+
+    // --- TOTAL VIEWS LOGIC ---
+    // Jab page load ho, count 1 barha do
+    viewsRef.transaction((current) => (current || 0) + 1);
+    
+    // Screen par update karo
+    viewsRef.on('value', (snapshot) => {
+        const val = snapshot.val() || 0;
+        // Dono jagah update karo agar duplicate IDs hain
+        document.querySelectorAll('#view-count').forEach(el => el.innerText = val);
+    });
+
+    // --- ONLINE USERS LOGIC ---
+    const myPresence = onlineRef.push(true);
+    myPresence.onDisconnect().remove(); // Tab band hone par minus
+
+    onlineRef.on('value', (snapshot) => {
+        const count = snapshot.numChildren();
+        document.querySelectorAll('#online-count').forEach(el => el.innerText = count);
+    });
+
+    // --- LIKES LOGIC ---
+    likesRef.on('value', (snapshot) => {
+        const val = snapshot.val() || 0;
+        document.querySelectorAll('#like-count').forEach(el => el.innerText = val);
+    });
+}
+
+// Like Button Function (Jo line 536 par onclick="handleLike()" hai)
+function handleLike() {
+    if (!localStorage.getItem('mi_ramadan_liked')) {
+        db.ref('stats/totalLikes').transaction(c => (c || 0) + 1);
+        localStorage.setItem('mi_ramadan_liked', 'true');
+        alert("Shukran! Aapka Like save ho gaya.");
+    } else {
+        alert("Aap pehle hi like kar chuke hain.");
+    }
+}
+
+// Isse page load hone par chalayen
+window.addEventListener('load', () => {
+    activateLiveStats();
+});
 
     </script>
+    
 </body>
 </html>
