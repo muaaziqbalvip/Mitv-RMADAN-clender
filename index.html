@@ -957,24 +957,24 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
-                <h5>ROZE GUZRE</h5>
-                <div class="val" id="count-done">--</div>
-            </div>
-            <div class="stat-card" onclick="toggleCalendar(true)">
-                <h5>ROZE BAQI</h5>
-                <div class="val" id="count-left" style="color: var(--gold);">--</div>
-                <small style="font-size: 0.5rem; display: block; margin-top: 5px;">VIEW CALENDAR</small>
-            </div>
-            <div class="stat-card">
-                <h5>SEHRI (FAJR)</h5>
-                <div class="val" id="sehri-val" style="color: var(--neon-green);">--:--</div>
-            </div>
-            <div class="stat-card">
-                <h5>IFTAR (MAGHRIB)</h5>
-                <div class="val" id="iftar-val" style="color: var(--neon-red);">--:--</div>
-            </div>
-        </div>
+    <div class="stat-card">
+        <h5>ROZE GUZRE</h5>
+        <div class="val" id="count-done">0</div>
+    </div>
+    <div class="stat-card" onclick="toggleCalendar(true)" style="cursor:pointer; border: 1px solid var(--gold);">
+        <h5>ROZE BAQI</h5>
+        <div class="val" id="count-left" style="color:var(--gold);">30</div>
+        <small style="font-size:0.5rem; color:var(--gold)">VIEW CALENDAR</small>
+    </div>
+    <div class="stat-card">
+        <h5>SEHRI ENDS</h5>
+        <div class="val" id="sehri-val" style="color:var(--neon-green);">--:--</div>
+    </div>
+    <div class="stat-card">
+        <h5>IFTAR STARTS</h5>
+        <div class="val" id="iftar-val" style="color:var(--neon-red);">--:--</div>
+    </div>
+</div>
         <div class="radio-container" id="radio-box">
     <div class="radio-info">
         <div class="radio-visualizer">
@@ -1143,140 +1143,166 @@
         </div>
     </div>
 
-    <div id="calendar-view">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color: var(--gold); font-family: 'Orbitron';">FULL CALENDAR</h2>
-            <button onclick="toggleCalendar(false)" style="background: none; border: 1px solid var(--gold); color: #fff; padding: 5px 15px; border-radius: 20px;">CLOSE</button>
-        </div>
-        <table class="cal-table">
-            <thead>
-                <tr>
-                    <th>RAMADAN</th>
-                    <th>DATE</th>
-                    <th>SEHRI</th>
-                    <th>IFTAR</th>
-                </tr>
-            </thead>
-            <tbody id="cal-body"></tbody>
-        </table>
+    <div id="calendar-view" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--dark-bg); z-index:9999; overflow-y:auto; padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="font-family:'Orbitron'; color:var(--gold);">RAMADAN 2026</h2>
+        <button onclick="toggleCalendar(false)" style="background:var(--gold); border:none; padding:5px 15px; border-radius:10px; font-weight:bold;">CLOSE</button>
     </div>
+    <table class="cal-table" style="width:100%; border-collapse:collapse; text-align:center;">
+        <thead style="background:var(--gold); color:#000;">
+            <tr>
+                <th style="padding:10px;">R#</th>
+                <th>DATE</th>
+                <th>SEHRI</th>
+                <th>IFTAR</th>
+            </tr>
+        </thead>
+        <tbody id="cal-body"></tbody>
+    </table>
+</div>
 
     <audio id="alarm-audio" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
 
     <script>
         
         /* ================================================
-           MEGA JAVASCRIPT ENGINE (800+ LINES LOGIC)
-           ================================================
-        */
+   MEGA JAVASCRIPT ENGINE (MANUAL DESIGN LOGIC)
+   ================================================ */
 
-        let userLat, userLon;
-        let apiData = null;
-        let calendarData = null;
-        const alarmNode = document.getElementById('alarm-audio');
+let userLat, userLon;
+let apiData = null;
+const alarmNode = document.getElementById('alarm-audio');
 
-        // 1. Core Start Engine
-        async function startEngine() {
-            // Mobile Volume/Alarm Permission Trick
-            alarmNode.play().then(() => {
-                alarmNode.pause();
-                alarmNode.currentTime = 0;
-            }).catch(e => console.log("Audio unlock needed"));
+// 1. Aapka Manually Designed Accurate Data (19 Feb Start)
+const ramadanData = [
+    { date: "19 Feb", sehri: "05:18", iftar: "17:58" },
+    { date: "20 Feb", sehri: "05:17", iftar: "17:59" },
+    { date: "21 Feb", sehri: "05:16", iftar: "18:00" },
+    { date: "22 Feb", sehri: "05:15", iftar: "18:01" },
+    { date: "23 Feb", sehri: "05:14", iftar: "18:02" },
+    { date: "24 Feb", sehri: "05:13", iftar: "18:03" },
+    { date: "25 Feb", sehri: "05:12", iftar: "18:04" },
+    { date: "26 Feb", sehri: "05:11", iftar: "18:05" },
+    { date: "27 Feb", sehri: "05:10", iftar: "18:05" },
+    { date: "28 Feb", sehri: "05:08", iftar: "18:06" },
+    { date: "01 Mar", sehri: "05:07", iftar: "18:07" },
+    { date: "02 Mar", sehri: "05:06", iftar: "18:08" },
+    { date: "03 Mar", sehri: "05:05", iftar: "18:09" },
+    { date: "04 Mar", sehri: "05:03", iftar: "18:10" },
+    { date: "05 Mar", sehri: "05:02", iftar: "18:11" },
+    { date: "06 Mar", sehri: "05:01", iftar: "18:11" },
+    { date: "07 Mar", sehri: "05:00", iftar: "18:12" },
+    { date: "08 Mar", sehri: "04:58", iftar: "18:13" },
+    { date: "09 Mar", sehri: "04:57", iftar: "18:14" },
+    { date: "10 Mar", sehri: "04:56", iftar: "18:15" },
+    { date: "11 Mar", sehri: "04:54", iftar: "18:15" },
+    { date: "12 Mar", sehri: "04:53", iftar: "18:16" },
+    { date: "13 Mar", sehri: "04:52", iftar: "18:17" },
+    { date: "14 Mar", sehri: "04:50", iftar: "18:18" },
+    { date: "15 Mar", sehri: "04:49", iftar: "18:19" },
+    { date: "16 Mar", sehri: "04:47", iftar: "18:19" },
+    { date: "17 Mar", sehri: "04:46", iftar: "18:20" },
+    { date: "18 Mar", sehri: "04:45", iftar: "18:21" },
+    { date: "19 Mar", sehri: "04:43", iftar: "18:22" },
+    { date: "20 Mar", sehri: "04:42", iftar: "18:22" }
+];
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    userLat = pos.coords.latitude;
-                    userLon = pos.coords.longitude;
-                    document.getElementById('mi-gate').style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'block';
-                    await syncData();
-                    initVisuals();
-                    setInterval(heartbeat, 1000);
-                }, () => {
-                    alert("Location denied! Setting default to Kasur, Pakistan.");
-                    userLat = 31.11; userLon = 74.44;
-                    document.getElementById('mi-gate').style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'block';
-                    syncData();
-                    initVisuals();
-                    setInterval(heartbeat, 1000);
-                });
-            }
-        }
+// 2. Start Engine
+async function startEngine() {
+    if (alarmNode) {
+        alarmNode.play().then(() => { alarmNode.pause(); alarmNode.currentTime = 0; }).catch(() => {});
+    }
 
-        // 2. Data Synchronization (Today + Month)
-        async function syncData() {
-            try {
-                const todayRes = await fetch(`https://api.aladhan.com/v1/timings?latitude=${userLat}&longitude=${userLon}&method=1`);
-                const todayJson = await todayRes.json();
-                apiData = todayJson.data;
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            userLat = pos.coords.latitude; userLon = pos.coords.longitude;
+            proceed();
+        }, () => {
+            userLat = 31.11; userLon = 74.44; proceed();
+        });
+    }
+}
 
-                const monthRes = await fetch(`https://api.aladhan.com/v1/calendar/2026/2?latitude=${userLat}&longitude=${userLon}&method=1`);
-                const monthJson = await monthRes.json();
-                calendarData = monthJson.data;
+function proceed() {
+    document.getElementById('mi-gate').style.display = 'none';
+    document.getElementById('main-ui').style.display = 'block';
+    syncData(); // Ye sirf namaz timings ke liye API use karega
+    renderCalendar(); // Ye manual data use karega
+    initVisuals();
+    setInterval(heartbeat, 1000);
+}
 
-                updateUI();
-                renderCalendar();
-            } catch (err) {
-                console.log("Sync Error");
-            }
-        }
+// 3. Sync Data (Only for Namaz Timings)
+async function syncData() {
+    try {
+        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${userLat}&longitude=${userLon}&method=1`);
+        const json = await res.json();
+        apiData = json.data;
+        updateUI();
+    } catch (e) { console.log("API Error"); }
+}
 
-        // 3. Time Formatter 12H
-        function format12(t) {
-            if(!t) return "--:--";
-            let [h, m] = t.split(':');
-            let ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12 || 12;
-            return `${h}:${m} ${ampm}`;
-        }
+// 4. Update UI (Dashboard)
+function updateUI() {
+    if (!apiData) return;
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-        // 4. Update Interface
-        function updateUI() {
-            const t = apiData.timings;
-            document.getElementById('loc-tag').innerText = apiData.meta.timezone.split('/')[1] || "SYNCED";
-            document.getElementById('sehri-val').innerText = format12(t.Fajr);
-            document.getElementById('iftar-val').innerText = format12(t.Maghrib);
-            document.getElementById('hijri-box').innerText = `${apiData.date.hijri.day} ${apiData.date.hijri.month.en} ${apiData.date.hijri.year}`;
+    // Dashboard ki Sehri/Iftar manual accurate array se uthayen
+    let todayManual = ramadanData.find(d => d.date === todayStr) || ramadanData[0];
+    document.getElementById('sehri-val').innerText = todayManual.sehri;
+    document.getElementById('iftar-val').innerText = todayManual.iftar;
 
-            // Fasting Progress (Ramadan 2026 starts approx Feb 18)
-            const startDate = new Date('2026-02-18');
-            const diff = Math.floor((new Date() - startDate) / (1000*60*60*24));
-            const done = diff > 0 ? (diff > 30 ? 30 : diff) : 0;
-            document.getElementById('count-done').innerText = done;
-            document.getElementById('count-left').innerText = 30 - done;
+    // Namaz timings API se
+    const t = apiData.timings;
+    const pList = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    let html = '';
+    pList.forEach(p => {
+        html += `<div class="prayer-item">
+            <div class="p-name"><i class="far fa-clock" style="color:var(--gold)"></i> ${p}</div>
+            <div class="p-time">${format12(t[p])}</div>
+        </div>`;
+    });
+    document.getElementById('prayer-items-box').innerHTML = html;
 
-            // Prayer List Rendering
-            const pList = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-            let html = '';
-            pList.forEach(p => {
-                html += `
-                <div class="prayer-item">
-                    <div class="p-name"><i class="far fa-clock" style="color:var(--gold)"></i> ${p}</div>
-                    <div class="p-time">${format12(t[p])}</div>
-                </div>`;
-            });
-            document.getElementById('prayer-items-box').innerHTML = html;
-        }
+    // Roze Progress (19 Feb Start)
+    const startDate = new Date('2026-02-19');
+    const diff = Math.floor((now - startDate) / (1000*60*60*24)) + 1;
+    const done = diff > 0 ? (diff > 30 ? 30 : diff) : 0;
+    document.getElementById('count-done').innerText = done;
+    document.getElementById('count-left').innerText = 30 - done;
+}
 
-        // 5. Calendar Modal Logic
-        function renderCalendar() {
-            let html = '';
-            calendarData.forEach((day, i) => {
-                html += `
-                <tr>
-                    <td>${i+1}</td>
-                    <td>${day.date.readable}</td>
-                    <td style="color:var(--neon-green)">${format12(day.timings.Fajr.split(' ')[0])}</td>
-                    <td style="color:var(--neon-red)">${format12(day.timings.Maghrib.split(' ')[0])}</td>
-                </tr>`;
-            });
-            document.getElementById('cal-body').innerHTML = html;
-        }
+// 5. Render Calendar (Manual Design Logic)
+function renderCalendar() {
+    let html = '';
+    const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-        function toggleCalendar(show) {
-            document.getElementById('calendar-view').style.display = show ? 'block' : 'none';
-        }
+    ramadanData.forEach((day, i) => {
+        const isToday = day.date === todayStr;
+        html += `
+        <tr style="${isToday ? 'background:rgba(255,204,51,0.2); border:1px solid var(--gold);' : ''}">
+            <td style="color:var(--gold); font-weight:bold; padding:12px;">${i+1}</td>
+            <td style="font-size:0.8rem;">${day.date}</td>
+            <td style="color:var(--neon-green); font-family:Orbitron;">${day.sehri}</td>
+            <td style="color:var(--neon-red); font-family:Orbitron;">${day.iftar}</td>
+        </tr>`;
+    });
+    document.getElementById('cal-body').innerHTML = html;
+}
+
+function format12(t) {
+    if(!t) return "--:--";
+    let [h, m] = t.split(':');
+    let ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
+}
+
+function toggleCalendar(show) {
+    document.getElementById('calendar-view').style.display = show ? 'block' : 'none';
+}
+
 
         // 6. Real-time Heartbeat (Countdown & Alarm)
         /* ================================================
