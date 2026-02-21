@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@100;300;400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -833,6 +834,49 @@
     font-size: 0.85rem;
     color: #fff;
 }
+/* Enable Notification Button Styling */
+.action-btn {
+    background: linear-gradient(45deg, #000, #1a1a1a);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px auto;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 204, 51, 0.2);
+    text-transform: uppercase;
+}
+
+.action-btn:hover {
+    background: var(--gold);
+    color: #000;
+    box-shadow: 0 0 20px var(--gold);
+    transform: translateY(-2px);
+}
+
+.action-btn i, .action-btn span {
+    font-size: 1.1rem;
+}
+
+/* Glowing Animation */
+@keyframes pulse-gold {
+    0% { box-shadow: 0 0 5px var(--gold); }
+    50% { box-shadow: 0 0 20px var(--gold); }
+    100% { box-shadow: 0 0 5px var(--gold); }
+}
+
+.action-btn.glowing {
+    animation: pulse-gold 2s infinite;
+}
 
     </style>
 </head>
@@ -877,6 +921,9 @@
 </div>
 <button id="pwa-install-btn">
     <i class="fas fa-download"></i> INSTALL MI RAMADAN PRO
+</button>
+<button onclick="requestNotificationPermission()" class="action-btn glowing">
+    <span>🔔</span> Enable Notifications
 </button>
 
     <div class="main-container" id="main-ui">
@@ -1225,7 +1272,11 @@ function heartbeat() {
     let minutes = now.getMinutes();
     let seconds = now.getSeconds();
     let ampm = hours >= 12 ? 'PM' : 'AM';
-    
+    // Har minute check karega
+if (typeof min !== 'undefined') {
+    checkTimeForNotifications(label, min); 
+}
+
     hours = hours % 12;
     hours = hours ? hours : 12; // 0 ko 12 banana
     
@@ -1765,6 +1816,54 @@ chatRef.limitToLast(15).on('child_added', (snapshot) => {
     chatBox.innerHTML += msgHtml;
     chatBox.scrollTop = chatBox.scrollHeight;
 });
+// 1. Messaging Initialize
+const messaging = firebase.messaging();
+
+// 2. Notification Permission Request
+function requestNotificationPermission() {
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+            // Token le sakte hain agar server se bhejna ho
+        } else {
+            console.log('Unable to get permission to notify.');
+        }
+    });
+}
+
+// 3. Simple Notification Function
+function sendLocalNotification(title, body) {
+    if (Notification.permission === 'granted') {
+        const options = {
+            body: body,
+            icon: 'https://i.ibb.co/rKM2mKWt/1771605401569.png', // Tumhara app icon
+            badge: 'https://i.ibb.co/rKM2mKWt/1771605401569.png',
+            vibrate: [200, 100, 200]
+        };
+        new Notification(title, options);
+    }
+}
+
+// 4. Time-Based Alerts (Iftar/Namaz)
+function checkTimeForNotifications(label, minutesLeft) {
+    // Agar 5 minute reh gaye hon to notification jaye
+    if (minutesLeft === 5) {
+        sendLocalNotification("Alert!", `${label} mein sirf 5 minute reh gaye hain. Tayyar ho jayen!`);
+    }
+    // Bilkul waqt hone par
+    if (minutesLeft === 0) {
+        sendLocalNotification("Ma-Sha-Allah", `${label} ka waqt ho gaya hai!`);
+    }
+}
+function requestNotificationPermission() {
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            console.log('Permission Granted!');
+            // Button ko chhupane ke liye
+            document.querySelector('.action-btn').style.display = 'none';
+        }
+    });
+}
 
     </script>
     
