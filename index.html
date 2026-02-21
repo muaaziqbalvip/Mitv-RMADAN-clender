@@ -749,6 +749,90 @@
     background: var(--gold);
     color: #000;
 }
+.chat-container {
+    background: var(--card-bg);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    margin-top: 25px;
+    overflow: hidden;
+}
+.chat-header {
+    background: rgba(255, 204, 51, 0.1);
+    padding: 10px;
+    font-family: 'Orbitron';
+    font-size: 0.8rem;
+    color: var(--gold);
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 204, 51, 0.2);
+}
+.chat-box {
+    height: 200px;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0,0,0,0.3);
+}
+.msg {
+    background: rgba(255,255,255,0.05);
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--gold);
+    animation: slideIn 0.3s ease;
+}
+.chat-input-area {
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+    background: #000;
+}
+#user-msg {
+    flex-grow: 1;
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 50px;
+    outline: none;
+}
+.chat-input-area button {
+    background: var(--gold);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#user-name {
+    background: rgba(255, 204, 51, 0.05);
+    border: 1px solid rgba(255, 204, 51, 0.3);
+    color: var(--gold);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    outline: none;
+}
+.msg-container {
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 12px;
+    border-left: 3px solid var(--gold);
+    margin-bottom: 8px;
+}
+.u-name {
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+.u-text {
+    font-size: 0.85rem;
+    color: #fff;
+}
 
     </style>
 </head>
@@ -949,6 +1033,19 @@
 
     </div>
 </div>
+<div class="chat-container">
+    <div class="chat-header"><i class="fas fa-comments"></i> PUBLIC FEEDBACK</div>
+    <div id="chat-messages" class="chat-box">
+        </div>
+    <div class="chat-input-area" style="flex-direction: column; gap: 5px;">
+        <input type="text" id="user-name" placeholder="Your Name" maxlength="20" style="width: 100%; margin-bottom: 5px;">
+        <div style="display: flex; gap: 10px; width: 100%;">
+            <input type="text" id="user-msg" placeholder="Write feedback..." maxlength="100" style="flex-grow: 1;">
+            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
 <div class="dua-container">
     <div class="dua-title"><i class="fas fa-hand-holding-heart"></i> Iftar Ki Dua</div>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -1631,6 +1728,42 @@ function handleLike() {
 // Isse page load hone par chalayen
 window.addEventListener('load', () => {
     activateLiveStats();
+});
+// Chat Logic with Name Support
+const chatRef = db.ref('public_chat');
+
+function sendMessage() {
+    const nameInput = document.getElementById('user-name');
+    const msgInput = document.getElementById('user-msg');
+    
+    const name = nameInput.value.trim() || "Anonymous"; // Agar naam na ho to Anonymous
+    const msg = msgInput.value.trim();
+    
+    if (msg !== "") {
+        chatRef.push({
+            username: name,
+            text: msg,
+            timestamp: Date.now()
+        });
+        msgInput.value = ""; // Sirf message clear karein, naam wahi rehne dein
+    } else {
+        alert("Please write a message first!");
+    }
+}
+
+// Live display with Username
+chatRef.limitToLast(15).on('child_added', (snapshot) => {
+    const data = snapshot.val();
+    const chatBox = document.getElementById('chat-messages');
+    
+    const msgHtml = `
+        <div class="msg-container">
+            <span class="u-name">${data.username}</span>
+            <span class="u-text">${data.text}</span>
+        </div>`;
+    
+    chatBox.innerHTML += msgHtml;
+    chatBox.scrollTop = chatBox.scrollHeight;
 });
 
     </script>
