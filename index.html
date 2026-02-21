@@ -734,7 +734,7 @@
 <div class="ticker-wrapper">
     <div class="ticker-label">LATEST UPDATES</div>
     <div class="ticker-content" id="mi-ticker">
-        <div class="ticker-item"><i class="fas fa-bullhorn"></i> Welcome to MI RAMADAN PRO - ICS Science Expert Edition</div>
+        <div class="ticker-item"><i class="fas fa-bullhorn"></i> Welcome to MI RAMADAN CLENDER THATS DEVELOPED BY MUAAZ IQBAL - ICS Science Expert Edition</div>
         <div class="ticker-item"><i class="fas fa-clock"></i> Live Sehri & Iftar Countdown Active</div>
         <div class="ticker-item"><i class="fas fa-tv"></i> Watch Paigham TV Live Stream with Maximize Mode</div>
         <div class="ticker-item"><i class="fas fa-microphone"></i> Listen Live Quran FM by Mishary Rashid Alafasy</div>
@@ -746,6 +746,7 @@
 <button id="pwa-install-btn">
     <i class="fas fa-download"></i> INSTALL MI RAMADAN PRO
 </button>
+
     <div class="main-container" id="main-ui">
         
         <div class="hero-section">
@@ -1062,7 +1063,6 @@ function heartbeat() {
         triggerLoudAlarm();
     }
 
-
     // --- PART 3: DYNAMIC COUNTDOWN ENGINE ---
     updateCountdownLogic(now, sehriTime, iftarTime);
 }
@@ -1114,18 +1114,6 @@ function updateCountdownLogic(now, sT_raw, iT_raw) {
     document.getElementById('countdown').innerText = 
         `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     document.getElementById('timer-title').innerText = label;
-}
-// Is line ko heartbeat() function ke andar kahin bhi paste kar dein
-function updateTickerMessage(label, color) {
-    const ticker = document.getElementById('mi-ticker');
-    // Notification logic yahan extend ki ja sakti hai
-}
-
-// Example Trigger (Iftar se 10 min pehle ticker ka color change karna)
-// Isse heartbeat ke andar use karein:
-if (h === 0 && min <= 10 && label === "Iftar Starts In") {
-    document.querySelector('.ticker-label').style.background = "var(--neon-red)";
-    document.querySelector('.ticker-label').innerText = "ALERT: IFTAR NEAR";
 }
 
         // 7. Live Ramadan Aura (Particles)
@@ -1194,7 +1182,7 @@ function countTasbeeh() {
     
     // Sound effect on every click (Optional)
     const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
-    tickSound.volume = 0.2;
+    tickSound.volume = 1.0;
     tickSound.play();
 }
 
