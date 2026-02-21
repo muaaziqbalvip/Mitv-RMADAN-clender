@@ -877,6 +877,27 @@
 .action-btn.glowing {
     animation: pulse-gold 2s infinite;
 }
+/* Verified Badge Styling */
+.verified-badge {
+    background: #1da1f2; /* Twitter wala blue color */
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+    font-weight: 900;
+    vertical-align: middle;
+}
+
+/* Admin Message special highlight */
+.admin-msg {
+    border-left: 4px solid #1da1f2 !important;
+    background: rgba(29, 161, 242, 0.05) !important;
+}
+
+.admin-msg .u-name {
+    color: #1da1f2 !important;
+}
 
     </style>
 </head>
@@ -1783,39 +1804,55 @@ window.addEventListener('load', () => {
 // Chat Logic with Name Support
 const chatRef = db.ref('public_chat');
 
+// Admin Key (Ise secret rakho, ya badal lo)
+const ADMIN_KEY = "MI123"; 
+
 function sendMessage() {
     const nameInput = document.getElementById('user-name');
     const msgInput = document.getElementById('user-msg');
     
-    const name = nameInput.value.trim() || "Anonymous"; // Agar naam na ho to Anonymous
+    let name = nameInput.value.trim() || "Anonymous";
     const msg = msgInput.value.trim();
     
     if (msg !== "") {
+        let isAdmin = false;
+        
+        // Agar tum apna naam "Muaaz MI123" likho ge to verified badge lag jaye ga
+        if (name.includes(ADMIN_KEY)) {
+            name = "Muaaz Iqbal"; // Screen par sirf asli naam dikhe
+            isAdmin = true;
+        }
+
         chatRef.push({
             username: name,
             text: msg,
+            role: isAdmin ? "admin" : "user", // Database mein role save karein
             timestamp: Date.now()
         });
-        msgInput.value = ""; // Sirf message clear karein, naam wahi rehne dein
-    } else {
-        alert("Please write a message first!");
+        
+        msgInput.value = "";
     }
 }
 
-// Live display with Username
+// Live display update logic
 chatRef.limitToLast(15).on('child_added', (snapshot) => {
     const data = snapshot.val();
     const chatBox = document.getElementById('chat-messages');
     
+    // Check karein ke message admin ka hai ya nahi
+    const badge = data.role === "admin" ? '<span class="verified-badge">✓ OWNER</span>' : '';
+    const adminClass = data.role === "admin" ? 'admin-msg' : '';
+
     const msgHtml = `
-        <div class="msg-container">
-            <span class="u-name">${data.username}</span>
+        <div class="msg-container ${adminClass}">
+            <span class="u-name">${data.username} ${badge}</span>
             <span class="u-text">${data.text}</span>
         </div>`;
     
     chatBox.innerHTML += msgHtml;
     chatBox.scrollTop = chatBox.scrollHeight;
 });
+
 // 1. Messaging Initialize
 const messaging = firebase.messaging();
 
