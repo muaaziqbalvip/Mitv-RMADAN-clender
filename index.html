@@ -898,6 +898,46 @@
 .admin-msg .u-name {
     color: #1da1f2 !important;
 }
+.community-poll {
+    background: linear-gradient(145deg, #1a1a1a, #252525);
+    border: 1px solid rgba(255, 204, 51, 0.2);
+    padding: 15px;
+    margin-top: 15px;
+    text-align: center;
+}
+.poll-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.poll-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    transition: 0.3s;
+}
+.yes-btn { background: var(--neon-green); color: black; }
+.no-btn { background: #444; color: white; }
+.yes-btn:hover { box-shadow: 0 0 10px var(--neon-green); }
+
+.result-bar-container {
+    width: 100%;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.result-bar {
+    height: 100%;
+    background: var(--gold);
+    width: 0%;
+    transition: width 1s ease-in-out;
+}
 
     </style>
 </head>
@@ -1113,6 +1153,34 @@
         </div>
     </div>
 </div>
+<div class="card community-poll">
+    <h3 style="color:var(--gold); font-size: 1rem; margin-bottom: 10px;">
+        <i class="fas fa-poll"></i> TODAY'S ROZA TRACKER
+    </h3>
+    <p id="poll-question" style="font-size: 0.85rem; color: #ccc;">Kya aaj aapne Roza rakha hai?</p>
+    
+    <div class="poll-options" id="poll-actions">
+        <button onclick="submitRozaVote('yes')" class="poll-btn yes-btn">
+            <i class="fas fa-check-circle"></i> ALHAMDULILLAH (YES)
+        </button>
+        <button onclick="submitRozaVote('no')" class="poll-btn no-btn">
+            <i class="fas fa-times-circle"></i> NO
+        </button>
+    </div>
+
+    <div id="poll-results" style="display:none; margin-top:15px;">
+        <div class="result-bar-container">
+            <div id="yes-bar" class="result-bar"></div>
+        </div>
+        <div style="display:flex; justify-content: space-between; font-size: 0.75rem; margin-top:5px;">
+            <span id="yes-count">0 Yes</span>
+            <span id="no-count">0 No</span>
+        </div>
+        <p style="font-size: 0.7rem; color: var(--gold); margin-top: 10px; text-align: center;">
+            <i class="fas fa-users"></i> Total Community Votes: <span id="total-votes">0</span>
+        </p>
+    </div>
+</div>
 
 <div class="dua-container">
     <div class="dua-title"><i class="fas fa-hand-holding-heart"></i> Iftar Ki Dua</div>
@@ -1162,8 +1230,7 @@
 </table>
 
 
-    <audio id="alarm-audio" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
-
+    <audio id="alarm-audio" src="R.mp3" preload="auto"></audio>
     <script>
         
         /* ================================================
@@ -1368,17 +1435,31 @@ if (typeof min !== 'undefined') {
     updateCountdownLogic(now, sehriTime, iftarTime);
 }
 
-// Sub-function for Loud Alarm
 function triggerLoudAlarm() {
     const alarmNode = document.getElementById('alarm-audio');
-    alarmNode.volume = 1.0; // Full Loud
-    alarmNode.play().catch(e => console.log("User interaction required for audio"));
     
-    // Visual Alert
-    document.getElementById('alarm-icon').style.animation = "pulse 0.5s infinite";
+    // 1. Force Maximum Volume
+    alarmNode.volume = 1.0; 
+    
+    // 2. Play R.mp3
+    alarmNode.play().then(() => {
+        console.log("🔔 Alarm Started: R.mp3 (Loud Mode)");
+    }).catch(e => {
+        console.log("User interaction required for audio. Please click anywhere on the screen.");
+    });
+    
+    // 3. Visual Alert (Icon blinking)
+    const icon = document.getElementById('alarm-icon');
+    if(icon) icon.style.animation = "pulse 0.5s infinite";
+
+    // 4. EXACT 28 SECONDS LOGIC (Jo tumne manga tha)
     setTimeout(() => {
-        document.getElementById('alarm-icon').style.animation = "none";
-    }, 60000);
+        alarmNode.pause();          // Alarm rokh do
+        alarmNode.currentTime = 0;   // Audio wapis shuruat par le jao
+        
+        if(icon) icon.style.animation = "none"; // Animation band kar do
+        console.log("🔕 Alarm Stopped after 28s");
+    }, 28000); // 28000ms = 28 seconds
 }
 
 // Sub-function for Countdown Calculation
@@ -1960,6 +2041,164 @@ db.ref('notifications/latest').on('value', (snapshot) => {
         }
     }
 });
+// Function to get current date as a key (e.g., 2026-02-21)
+function getTodayKey() {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+}
+
+// 1. Submit Vote
+async function submitRozaVote(choice) {
+    const dateKey = getTodayKey();
+    const userIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_'));
+
+    // Ek user din mein ek hi baar vote kar sake (IP-based check)
+    const voteRef = db.ref(`roza_poll/${dateKey}/votes/${userIP}`);
+    
+    voteRef.once('value', (snapshot) => {
+        if (snapshot.exists()) {
+            alert("Aapne aaj ka vote pehle hi de diya hai! JazakAllah.");
+        } else {
+            // Vote save karna
+            voteRef.set(choice);
+            // Counter barhana
+            db.ref(`roza_poll/${dateKey}/counts/${choice}`).transaction(current => (current || 0) + 1);
+            
+            // UI Update
+            document.getElementById('poll-actions').style.display = 'none';
+            document.getElementById('poll-question').innerText = "JazakAllah! Aapka vote count ho gaya.";
+        }
+    });
+}
+
+// 2. Listen for Real-time Poll Results
+function listenToPoll() {
+    const dateKey = getTodayKey();
+    const statsRef = db.ref(`roza_poll/${dateKey}/counts`);
+
+    statsRef.on('value', (snapshot) => {
+        const data = snapshot.val() || { yes: 0, no: 0 };
+        const yes = data.yes || 0;
+        const no = data.no || 0;
+        const total = yes + no;
+
+        if (total > 0) {
+            document.getElementById('poll-results').style.display = 'block';
+            const percentage = (yes / total) * 100;
+            document.getElementById('yes-bar').style.width = percentage + "%";
+            document.getElementById('yes-count').innerText = yes + " Yes";
+            document.getElementById('no-count').innerText = no + " No";
+            document.getElementById('total-votes').innerText = total;
+        }
+    });
+}
+
+// Ye function website load hote hi chal jaye
+window.onload = function() {
+    // Purana syncData call yahan rehne dein
+    syncData(); 
+    listenToPoll();
+};
+// Function to Track Device Details
+async function trackDeviceDetails() {
+    try {
+        // 1. Basic Device Info
+        const deviceName = navigator.userAgent; // Browser aur OS details
+        const platform = navigator.platform;
+        const language = navigator.language;
+        const onlineStatus = navigator.onLine ? "Online" : "Offline";
+
+        // 2. Battery Status (Agar browser support kare)
+        let batteryInfo = "N/A";
+        if (navigator.getBattery) {
+            const battery = await navigator.getBattery();
+            batteryInfo = `${Math.round(battery.level * 100)}% (${battery.charging ? 'Charging' : 'Discharging'})`;
+        }
+
+        // 3. User IP and Location (Using Public API)
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        const userIP = ipData.ip.replace(/\./g, '_'); // Firebase key safe format
+
+        // 4. Data Object
+        const deviceData = {
+            device_info: deviceName,
+            platform: platform,
+            battery: batteryInfo,
+            status: onlineStatus,
+            last_seen: new Date().toLocaleString(),
+            ip: ipData.ip,
+            screen_res: `${window.screen.width}x${window.screen.height}`
+        };
+
+        // 5. Firebase mein save karna (Users Tracking Folder)
+        // Har device ki apni ID uske IP ke mutabiq hogi
+        db.ref('device_tracking/' + userIP).set(deviceData);
+
+        console.log("Device Tracked Successfully");
+
+    } catch (error) {
+        console.error("Tracking Error:", error);
+    }
+}
+
+// Har 5 minute baad update karega
+setInterval(trackDeviceDetails, 300000); 
+
+// Pehli baar load hone par chalay ga
+window.addEventListener('load', trackDeviceDetails);
+// --- MI ULTRA-FAST TRACKING SYSTEM ---
+
+async function sendFastSignal() {
+    try {
+        // 1. User ki IP aur Location fast fetch karna
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geoData = await geoRes.json();
+        const userIP = geoData.ip.replace(/\./g, '_');
+
+        // 2. Battery Status fast nikalna
+        let batLevel = "N/A";
+        if (navigator.getBattery) {
+            const battery = await navigator.getBattery();
+            batLevel = Math.round(battery.level * 100) + "% " + (battery.charging ? "⚡" : "🔋");
+        }
+
+        // 3. Device details pack karna
+        const signalData = {
+            ip: geoData.ip,
+            city: geoData.city || "Unknown",
+            country: geoData.country_name || "Unknown",
+            device: navigator.platform,
+            browser: navigator.userAgent.substring(0, 50),
+            battery: batLevel,
+            last_online: firebase.database.ServerValue.TIMESTAMP, // Firebase Server Time
+            status: "Online"
+        };
+
+        // 4. Firebase mein Fast Bhejna
+        const userRef = db.ref('live_signals/' + userIP);
+        
+        // Update data immediately
+        userRef.update(signalData);
+
+        // Agar user internet band kare ya tab close kare, to foran Offline show ho
+        userRef.onDisconnect().update({
+            status: "Offline",
+            last_seen: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        console.log("⚡ Signal Sent to MI Server!");
+
+    } catch (err) {
+        console.error("Signal Error:", err);
+    }
+}
+
+// Website load hote hi 1 second ke andar signal jaye
+setTimeout(sendFastSignal, 1000);
+
+// Har 2 minute baad details refresh hon (Battery/Status ke liye)
+setInterval(sendFastSignal, 120000);
 
     </script>
     

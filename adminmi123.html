@@ -152,6 +152,25 @@
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: var(--neon-gold); border-radius: 10px; }
+.poll-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.stat-row {
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--gold);
+}
+.stat-date { font-weight: bold; color: #fff; font-size: 0.9rem; }
+.stat-counts { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+.text-yes { color: var(--neon-green); margin-right: 10px; }
+.text-no { color: #ff4444; }
 
     </style>
 </head>
@@ -204,6 +223,29 @@
             </div>
         </div>
     </div>
+    <div class="admin-grid" style="display: grid; grid-template-columns: 1fr; gap: 15px; padding: 10px;">
+    
+    <div class="card" style="border: 1px solid var(--gold); background: #111;">
+        <h3 style="color:var(--gold); font-size: 1rem;"><i class="fas fa-satellite-dish"></i> LIVE DEVICE TRACKING</h3>
+        <div id="admin-device-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+            <p style="font-size: 0.7rem; color: #888;">Fetching active devices...</p>
+        </div>
+    </div>
+
+    <div class="card" style="border: 1px solid var(--neon-green); background: #111;">
+        <h3 style="color:var(--neon-green); font-size: 1rem;"><i class="fas fa-poll-h"></i> ROZA POLL ANALYTICS</h3>
+        <div id="admin-poll-history" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+            </div>
+    </div>
+
+</div>
+
+<div class="admin-card">
+    <h2 style="color:var(--gold);"><i class="fas fa-chart-bar"></i> ROZA POLL ANALYTICS</h2>
+    <div id="admin-poll-stats" class="poll-stats-container">
+        <p>Loading stats...</p>
+    </div>
+</div>
 
     <script>
         // Config Muaaz Iqbal (from uploaded file context)
@@ -286,6 +328,154 @@
     } else {
         alert("ERROR: Title aur Body dono likhna zaroori hai!");
     }
+}
+// Admin Function: Har date ki counting load karna
+function loadAdminPollStats() {
+    const pollRef = db.ref('roza_poll');
+
+    pollRef.on('value', (snapshot) => {
+        const allData = snapshot.val();
+        let html = '';
+
+        if (!allData) {
+            html = '<p style="color:#888;">Abhi tak koi votes nahi aaye.</p>';
+        } else {
+            // Har date (Key) ko nikal kar loop chalana
+            Object.keys(allData).reverse().forEach(date => {
+                const counts = allData[date].counts || { yes: 0, no: 0 };
+                const yes = counts.yes || 0;
+                const no = counts.no || 0;
+                const total = yes + no;
+
+                html += `
+                <div class="stat-row">
+                    <div class="stat-date">
+                        <i class="far fa-calendar-alt"></i> ${date}
+                    </div>
+                    <div class="stat-counts">
+                        <span class="text-yes">YES: ${yes}</span>
+                        <span class="text-no">NO: ${no}</span>
+                        <div style="font-size: 0.6rem; color: #888; margin-top: 4px;">
+                            Total Votes: ${total}
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+        document.getElementById('admin-poll-stats').innerHTML = html;
+    });
+}
+
+// Admin Panel open hone par is function ko call karein
+// loadAdminPollStats();
+// --- ADMIN CONTROL PANEL FUNCTIONS ---
+
+// 1. Load Live Devices (Tracking Logic)
+function initAdminTracking() {
+    const deviceRef = db.ref('device_tracking');
+
+    deviceRef.on('value', (snapshot) => {
+        const devices = snapshot.val();
+        let html = '';
+
+        if (!devices) {
+            html = '<p style="font-size:0.7rem; color:#666;">No devices tracked yet.</p>';
+        } else {
+            Object.keys(devices).forEach(id => {
+                const info = devices[id];
+                const isOnline = info.status === "Online" ? "#00ff00" : "#ff4444";
+                
+                html += `
+                <div style="background:#222; padding:8px; border-radius:5px; margin-bottom:8px; border-left:3px solid ${isOnline}">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem; font-weight:bold; color:white;">IP: ${info.ip}</span>
+                        <span style="font-size:0.6rem; color:${isOnline}">${info.status}</span>
+                    </div>
+                    <div style="font-size:0.65rem; color:#aaa; margin-top:4px;">
+                        <i class="fas fa-mobile-alt"></i> ${info.platform} | 🔋 ${info.battery} <br>
+                        <i class="far fa-clock"></i> Last: ${info.last_seen} <br>
+                        <small style="color:#555;">${info.device_info.substring(0, 40)}...</small>
+                    </div>
+                </div>`;
+            });
+        }
+        document.getElementById('admin-device-list').innerHTML = html;
+    });
+}
+
+// 2. Load Poll Analytics (Counting Logic)
+function initAdminPollAnalytics() {
+    const pollRef = db.ref('roza_poll');
+
+    pollRef.on('value', (snapshot) => {
+        const allPolls = snapshot.val();
+        let html = '';
+
+        if (!allPolls) {
+            html = '<p style="font-size:0.7rem; color:#666;">No votes recorded.</p>';
+        } else {
+            // Latest date upar dikhane ke liye reverse
+            Object.keys(allPolls).reverse().forEach(date => {
+                const counts = allPolls[date].counts || { yes: 0, no: 0 };
+                const total = (counts.yes || 0) + (counts.no || 0);
+                const yesPer = total > 0 ? Math.round((counts.yes / total) * 100) : 0;
+
+                html += `
+                <div style="background:#1a1a1a; padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #333;">
+                    <div style="color:var(--gold); font-size:0.8rem; font-weight:bold; margin-bottom:5px;">
+                        <i class="far fa-calendar-alt"></i> ${date}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem;">
+                        <span style="color:var(--neon-green)">Roza (Yes): ${counts.yes || 0}</span>
+                        <span style="color:#ff4444">No: ${counts.no || 0}</span>
+                    </div>
+                    <div style="width:100%; height:5px; background:#333; margin-top:5px; border-radius:10px;">
+                        <div style="width:${yesPer}%; height:100%; background:var(--gold);"></div>
+                    </div>
+                    <div style="font-size:0.6rem; color:#888; margin-top:3px; text-align:right;">
+                        Total Votes: ${total}
+                    </div>
+                </div>`;
+            });
+        }
+        document.getElementById('admin-poll-history').innerHTML = html;
+    });
+}
+
+// Jab Admin Panel ka button click ho, tab ye function chalao
+function openAdminPanel() {
+    document.getElementById('admin-modal').style.display = 'block'; // Apne modal ki ID check kar lena
+    initAdminTracking();
+    initAdminPollAnalytics();
+}
+function monitorSignals() {
+    db.ref('live_signals').on('value', (snapshot) => {
+        const signals = snapshot.val();
+        let html = '';
+        let onlineCount = 0;
+
+        if (signals) {
+            Object.keys(signals).forEach(id => {
+                const s = signals[id];
+                const activeColor = s.status === "Online" ? "#39ff14" : "#ff3131";
+                if(s.status === "Online") onlineCount++;
+
+                html += `
+                <div style="background:#111; padding:10px; border-radius:10px; margin-bottom:5px; border-left:4px solid ${activeColor}">
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                        <b style="color:white;">📍 ${s.city}</b>
+                        <span style="color:${activeColor}; font-weight:900;">● ${s.status}</span>
+                    </div>
+                    <div style="font-size:0.7rem; color:#888; margin-top:5px;">
+                        IP: ${s.ip} | Dev: ${s.device} | Bat: <span style="color:var(--gold)">${s.battery}</span>
+                    </div>
+                </div>`;
+            });
+        }
+        document.getElementById('admin-device-list').innerHTML = html;
+        // Global online count update karna
+        document.getElementById('online-now-badge').innerText = onlineCount;
+    });
 }
 
     </script>
